@@ -69,10 +69,10 @@ void InitBattlefieldLayout(GameState *state, int screenWidth, int screenHeight) 
     int totalFieldContentH = 4 * cardH + 3 * 8; // 4 hàng + 3 khoảng cách 8px
     int fieldStartY = fieldTopY + (fieldH - totalFieldContentH) / 2;
     
-    int enemyAtkY = fieldStartY; 
-    int enemyDefY = fieldStartY + cardH + 8;     
-    int playerDefY = fieldStartY + 2 * (cardH + 8);                  
-    int playerAtkY = fieldStartY + 3 * (cardH + 8);    
+    int enemyDefY = fieldStartY; 
+    int enemyAtkY = fieldStartY + cardH + 8;     
+    int playerAtkY = fieldStartY + 2 * (cardH + 8);                  
+    int playerDefY = fieldStartY + 3 * (cardH + 8);    
 
     for(int i=0; i<5; i++) {
         int x = startX + i * (cardW + gap);
@@ -245,6 +245,7 @@ static void DrawRightPanel(GameState *state) {
     // === VẼ PHASE HIỆN TẠI ===
     const char* phaseStr = "";
     switch(state->currentPhase) {
+        case PHASE_PREPARATION: phaseStr = isEnglishMode ? "PREPARATION" : "CHUAN BI"; break;
         case PHASE_DRAW: phaseStr = isEnglishMode ? "DRAW PHASE" : "RUT BAI"; break;
         case PHASE_STANDBY: phaseStr = isEnglishMode ? "STANDBY" : "CHO"; break;
         case PHASE_MAIN_1: phaseStr = isEnglishMode ? "MAIN PHASE 1" : "GIAI DOAN CHINH"; break;
@@ -454,4 +455,43 @@ void DrawBattlefield(GameState *state) {
     DrawRightPanel(state);
     DrawLeftPanel(state);
     DrawCardDrawAnimation(state);
+
+    if (state->isRollingDice) {
+        int screenW = GetScreenWidth();
+        int screenH = GetScreenHeight();
+        
+        // Vẽ overlay làm mờ nền
+        DrawRectangle(0, 0, screenW, screenH, (Color){0, 0, 0, 150});
+        
+        // Vẽ box chứa thông tin đổ xúc xắc
+        int boxW = 500;
+        int boxH = 300;
+        int boxX = (screenW - boxW) / 2;
+        int boxY = (screenH - boxH) / 2;
+        
+        DrawRectangle(boxX, boxY, boxW, boxH, DARKBLUE);
+        DrawRectangleLinesEx((Rectangle){boxX, boxY, boxW, boxH}, 4, GOLD);
+        
+        const char* titleStr = isEnglishMode ? "ROLLING DICE TO DECIDE TURN!" : "DO XUC XAC GIANH QUYEN DI TRUOC!";
+        DrawText(titleStr, boxX + boxW/2 - MeasureText(titleStr, 24)/2, boxY + 30, 24, WHITE);
+        
+        // Xúc xắc Player (Trái)
+        DrawRectangle(boxX + 100, boxY + 120, 80, 80, RAYWHITE);
+        DrawRectangleLinesEx((Rectangle){boxX + 100, boxY + 120, 80, 80}, 2, BLACK);
+        char pDiceStr[4];
+        sprintf(pDiceStr, "%d", state->playerDiceValue);
+        DrawText(pDiceStr, boxX + 100 + 40 - MeasureText(pDiceStr, 40)/2, boxY + 120 + 20, 40, BLACK);
+        DrawText("P1", boxX + 100 + 40 - MeasureText("P1", 20)/2, boxY + 220, 20, GREEN);
+        
+        // Xúc xắc Enemy (Phải)
+        DrawRectangle(boxX + 320, boxY + 120, 80, 80, RAYWHITE);
+        DrawRectangleLinesEx((Rectangle){boxX + 320, boxY + 120, 80, 80}, 2, BLACK);
+        char eDiceStr[4];
+        sprintf(eDiceStr, "%d", state->enemyDiceValue);
+        DrawText(eDiceStr, boxX + 320 + 40 - MeasureText(eDiceStr, 40)/2, boxY + 120 + 20, 40, BLACK);
+        DrawText("P2", boxX + 320 + 40 - MeasureText("P2", 20)/2, boxY + 220, 20, RED);
+        
+        // Chữ VS ở giữa
+        DrawText("VS", boxX + boxW/2 - MeasureText("VS", 30)/2, boxY + 145, 30, GOLD);
+    }
 }
