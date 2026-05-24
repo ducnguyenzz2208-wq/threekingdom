@@ -27,6 +27,20 @@ typedef struct {
     Texture2D texture;   
 } Card;
 
+// Trạng thái hiệu ứng rút bài
+typedef struct {
+    bool active;           // Đang chạy animation?
+    float timer;           // Thời gian hiện tại (0 -> duration)
+    float duration;        // Tổng thời gian animation (giây)
+    Vector2 startPos;      // Vị trí xuất phát (deck)
+    Vector2 endPos;        // Vị trí đích (tay bài)
+    float startW, startH;  // Kích thước lúc bắt đầu
+    float endW, endH;      // Kích thước lúc kết thúc
+    const Card* card;      // Lá bài đang rút
+    bool showFront;        // Hiện mặt trước hay mặt sau
+    float flipTimer;       // Timer lật bài
+} DrawAnimState;
+
 // 6 Phase chuẩn của Yu-Gi-Oh!
 typedef enum {
     PHASE_DRAW = 0,
@@ -55,6 +69,12 @@ typedef struct {
     const Card* enemyHand[MAX_HAND_CARDS];
     int enemyHandCount;
 
+    // Bộ bài (Deck) mỗi bên 40 lá
+    const Card* playerDeck[DECK_SIZE];
+    int playerDeckCount;
+    const Card* enemyDeck[DECK_SIZE];
+    int enemyDeckCount;
+
     Slot playerAtkRow[5];
     Slot playerDefRow[5];
     Slot enemyAtkRow[5];
@@ -78,13 +98,20 @@ typedef struct {
     const Card* hoveredCard; 
     bool hoveredCardIsEnemy;
 
+    // Hiệu ứng rút bài
+    DrawAnimState drawAnim;
+    
+    // Status
+    int gameStatus; // 0 = playing, 1 = win, 2 = lose
+
 } GameState;
 
 typedef enum {
     SCREEN_MENU = 0,
     SCREEN_AI,
     SCREEN_PVP,
-    SCREEN_STORY
+    SCREEN_STORY,
+    SCREEN_SETTINGS
 } GameScreen;
 
 #endif // GAME_STRUCTS_H

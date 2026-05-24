@@ -18,4 +18,13 @@ extern Texture2D cardBackTexture;
 void LoadAllCardTextures(void);
 void UnloadAllCardTextures(void);
 
+// Audio globals
+extern Music bgmMenu;
+extern Music bgmBattle;
+extern Music bgmWin;
+extern Music bgmLose;
+
+void LoadAllMusic(void);
+void UnloadAllMusic(void);
+
 #endif // GAME_DATA_H

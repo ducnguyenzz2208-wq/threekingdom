@@ -2,6 +2,7 @@
 #include "game_data.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 // Hàm helper để vẽ chữ tự động xuống dòng (Word Wrap)
 static void DrawTextWrapped(const char* text, int x, int y, int fontSize, Color color, int maxWidth) {
@@ -162,9 +163,46 @@ static void DrawLeftPanel(GameState *state) {
             DrawTexturePro(displayCard->texture, (Rectangle){0,0,displayCard->texture.width,displayCard->texture.height}, (Rectangle){imgX, imgY, imgW, imgH}, (Vector2){0,0}, 0.0f, WHITE);
             DrawRectangleLinesEx((Rectangle){imgX, imgY, imgW, imgH}, 3, GOLD);
         }
-        DrawRectangleRec((Rectangle){imgX, imgY + imgH + 10, imgW, screenH - (imgY + imgH + 150)}, RAYWHITE);
-        DrawText(isEnglishMode ? displayCard->name_en : displayCard->name_vn, imgX + 10, imgY + imgH + 20, 20, BLACK);
-        DrawTextWrapped(isEnglishMode ? displayCard->desc_en : displayCard->desc_vn, imgX + 10, imgY + imgH + 50, 16, DARKGRAY, imgW - 20);
+        int infoBoxY = imgY + imgH + 10;
+        int infoBoxH = screenH - (imgY + imgH + 150);
+        DrawRectangleRec((Rectangle){imgX, infoBoxY, imgW, infoBoxH}, RAYWHITE);
+        
+        // Tên tướng
+        DrawText(isEnglishMode ? displayCard->name_en : displayCard->name_vn, imgX + 10, infoBoxY + 10, 20, BLACK);
+        
+        // === HIỂN THỊ ATK/DEF ===
+        int statsY = infoBoxY + 38;
+        
+        // ATK
+        char atkStr[32];
+        sprintf(atkStr, "ATK: %d", displayCard->atk);
+        DrawText(atkStr, imgX + 10, statsY, 18, (Color){200, 50, 50, 255});
+        
+        // DEF  
+        char defStr[32];
+        sprintf(defStr, "DEF: %d", displayCard->def);
+        int atkTextW = MeasureText(atkStr, 18);
+        DrawText(defStr, imgX + 10 + atkTextW + 20, statsY, 18, (Color){50, 100, 200, 255});
+        
+        // Loại tướng + Số sao
+        int typeY = statsY + 24;
+        const char* typeStr = displayCard->type == TYPE_VO ? (isEnglishMode ? "Warrior" : "Vo Tuong") : (isEnglishMode ? "Strategist" : "Van Tuong");
+        char starStr[64];
+        sprintf(starStr, "%s | ", typeStr);
+        // Vẽ sao
+        int starTextX = imgX + 10;
+        DrawText(starStr, starTextX, typeY, 16, (Color){120, 120, 120, 255});
+        starTextX += MeasureText(starStr, 16);
+        for (int s = 0; s < displayCard->stars; s++) {
+            DrawText("*", starTextX + s * 14, typeY, 16, GOLD);
+        }
+        
+        // Đường kẻ phân cách
+        int sepY = typeY + 24;
+        DrawRectangle(imgX + 10, sepY, imgW - 20, 1, (Color){200, 200, 200, 255});
+        
+        // Mô tả
+        DrawTextWrapped(isEnglishMode ? displayCard->desc_en : displayCard->desc_vn, imgX + 10, sepY + 8, 16, DARKGRAY, imgW - 20);
     }
 
     DrawRectangleRec(state->btnNextRect, GOLD);
@@ -271,25 +309,149 @@ static void DrawRightPanel(GameState *state) {
     const char* handLabel = isEnglishMode ? "HAND" : "TAY BAI";
     DrawText(handLabel, leftW + 10, fieldBottomY + 8, 14, (Color){200, 200, 200, 150});
     
-    // === VẼ DECK Ở MÉP PHẢI ===
+    // === VẼ DECK PLAYER Ở MÉP PHẢI ===
     int deckCardW = handCardW * 0.7;
     int deckCardH = deckCardW * 1.4;
     int deckX = screenW - deckCardW - 15;
     int deckY = handY + (handCardH - deckCardH) / 2;
     
-    if (cardBackTexture.id > 0) {
-        DrawTexturePro(cardBackTexture, 
-            (Rectangle){0, 0, cardBackTexture.width, cardBackTexture.height},
-            (Rectangle){deckX, deckY, deckCardW, deckCardH},
-            (Vector2){0,0}, 0.0f, WHITE);
+    if (state->playerDeckCount > 0) {
+        // Vẽ hiệu ứng chồng bài (3 lớp)
+        int stackLayers = state->playerDeckCount > 3 ? 3 : state->playerDeckCount;
+        for (int layer = stackLayers - 1; layer >= 0; layer--) {
+            int offsetX = layer * 2;
+            int offsetY = -layer * 2;
+            Color tint = (layer == 0) ? WHITE : (Color){200, 200, 200, 200};
+            if (cardBackTexture.id > 0) {
+                DrawTexturePro(cardBackTexture, 
+                    (Rectangle){0, 0, cardBackTexture.width, cardBackTexture.height},
+                    (Rectangle){deckX + offsetX, deckY + offsetY, deckCardW, deckCardH},
+                    (Vector2){0,0}, 0.0f, tint);
+            } else {
+                DrawRectangle(deckX + offsetX, deckY + offsetY, deckCardW, deckCardH, (Color){100, 50, 20, 255});
+            }
+            if (layer == 0) {
+                DrawRectangleLinesEx((Rectangle){deckX, deckY, deckCardW, deckCardH}, 2, GOLD);
+            }
+        }
     } else {
-        DrawRectangle(deckX, deckY, deckCardW, deckCardH, (Color){100, 50, 20, 255});
+        // Deck trống - vẽ viền mờ
+        DrawRectangleLinesEx((Rectangle){deckX, deckY, deckCardW, deckCardH}, 2, Fade(GOLD, 0.3f));
     }
-    DrawRectangleLinesEx((Rectangle){deckX, deckY, deckCardW, deckCardH}, 2, GOLD);
-    DrawText("DECK", deckX + 2, deckY + deckCardH + 3, 11, GOLD);
+    
+    // Hiển thị số bài còn lại trong deck
+    char deckCountStr[16];
+    sprintf(deckCountStr, "DECK:%d", state->playerDeckCount);
+    DrawText(deckCountStr, deckX - 5, deckY + deckCardH + 3, 11, GOLD);
+    
+    // === VẼ DECK ENEMY Ở GÓC TRÊN PHẢI (dưới thanh LP) ===
+    int enemyDeckX = screenW - deckCardW - 15;
+    int enemyDeckY = 40;
+    int enemyDeckH = deckCardH * 0.6;
+    int enemyDeckW = enemyDeckH / 1.4;
+    
+    if (state->enemyDeckCount > 0) {
+        int eLayers = state->enemyDeckCount > 3 ? 3 : state->enemyDeckCount;
+        for (int layer = eLayers - 1; layer >= 0; layer--) {
+            Color tint = (layer == 0) ? WHITE : (Color){200, 200, 200, 200};
+            if (cardBackTexture.id > 0) {
+                DrawTexturePro(cardBackTexture, 
+                    (Rectangle){0, 0, cardBackTexture.width, cardBackTexture.height},
+                    (Rectangle){enemyDeckX + layer*1, enemyDeckY - layer*1, enemyDeckW, enemyDeckH},
+                    (Vector2){0,0}, 0.0f, tint);
+            } else {
+                DrawRectangle(enemyDeckX + layer*1, enemyDeckY - layer*1, enemyDeckW, enemyDeckH, (Color){100, 50, 20, 255});
+            }
+        }
+        DrawRectangleLinesEx((Rectangle){enemyDeckX, enemyDeckY, enemyDeckW, enemyDeckH}, 1, (Color){255, 80, 80, 200});
+    }
+    char enemyDeckStr[16];
+    sprintf(enemyDeckStr, "DECK:%d", state->enemyDeckCount);
+    DrawText(enemyDeckStr, enemyDeckX - 5, enemyDeckY + enemyDeckH + 3, 11, (Color){255, 80, 80, 200});
+}
+
+// === VẼ HIỆU ỨNG RÚT BÀI ===
+static void DrawCardDrawAnimation(GameState *state) {
+    if (!state->drawAnim.active || !state->drawAnim.card) return;
+    
+    float t = state->drawAnim.timer / state->drawAnim.duration;
+    if (t > 1.0f) t = 1.0f;
+    
+    // Easing: ease-out cubic cho chuyển động mượt
+    float ease = 1.0f - powf(1.0f - t, 3.0f);
+    
+    // Nội suy vị trí
+    float curX = state->drawAnim.startPos.x + (state->drawAnim.endPos.x - state->drawAnim.startPos.x) * ease;
+    float curY = state->drawAnim.startPos.y + (state->drawAnim.endPos.y - state->drawAnim.startPos.y) * ease;
+    
+    // Nội suy kích thước
+    float curW = state->drawAnim.startW + (state->drawAnim.endW - state->drawAnim.startW) * ease;
+    float curH = state->drawAnim.startH + (state->drawAnim.endH - state->drawAnim.startH) * ease;
+    
+    // Hiệu ứng nâng lên (arc) - bài bay lên cao rồi hạ xuống
+    float arcHeight = -80.0f * sinf(t * 3.14159f);
+    curY += arcHeight;
+    
+    // === VẼ GLOW EFFECT ===
+    float glowAlpha = 0.4f * sinf(t * 3.14159f); // Glow mạnh nhất ở giữa animation
+    Color glowColor = (Color){255, 215, 0, (unsigned char)(glowAlpha * 255)};
+    DrawRectangle(curX - 6, curY - 6, curW + 12, curH + 12, glowColor);
+    DrawRectangle(curX - 3, curY - 3, curW + 6, curH + 6, (Color){255, 240, 150, (unsigned char)(glowAlpha * 200)});
+    
+    // === HIỆU ỨNG LẬT BÀI ===
+    float flipProgress = state->drawAnim.flipTimer / (state->drawAnim.duration * 0.4f);
+    if (flipProgress > 1.0f) flipProgress = 1.0f;
+    
+    // Scale X để tạo hiệu ứng lật (thu nhỏ -> mở rộng)
+    float scaleX = 1.0f;
+    if (!state->drawAnim.showFront) {
+        // Đang thu nhỏ chiều ngang (chuẩn bị lật)
+        scaleX = 1.0f - flipProgress;
+        if (scaleX < 0.05f) scaleX = 0.05f;
+    } else {
+        // Đã lật, mở rộng lại
+        float flipExpandT = (state->drawAnim.flipTimer - state->drawAnim.duration * 0.4f) / (state->drawAnim.duration * 0.2f);
+        if (flipExpandT < 0.0f) flipExpandT = 0.0f;
+        if (flipExpandT > 1.0f) flipExpandT = 1.0f;
+        scaleX = flipExpandT;
+        if (scaleX < 0.05f) scaleX = 0.05f;
+    }
+    
+    float drawW = curW * scaleX;
+    float drawX = curX + (curW - drawW) / 2.0f; // Căn giữa khi thu nhỏ
+    
+    Rectangle dest = {drawX, curY, drawW, curH};
+    
+    if (state->drawAnim.showFront && state->drawAnim.card->texture.id > 0) {
+        // Vẽ mặt trước
+        Rectangle src = {0, 0, state->drawAnim.card->texture.width, state->drawAnim.card->texture.height};
+        DrawTexturePro(state->drawAnim.card->texture, src, dest, (Vector2){0,0}, 0.0f, WHITE);
+        DrawRectangleLinesEx(dest, 3, GOLD);
+    } else {
+        // Vẽ mặt sau
+        if (cardBackTexture.id > 0) {
+            Rectangle src = {0, 0, cardBackTexture.width, cardBackTexture.height};
+            DrawTexturePro(cardBackTexture, src, dest, (Vector2){0,0}, 0.0f, WHITE);
+        } else {
+            DrawRectangleRec(dest, (Color){100, 50, 20, 255});
+        }
+        DrawRectangleLinesEx(dest, 2, (Color){180, 150, 80, 255});
+    }
+    
+    // Vẽ particles/sparkle nhỏ xung quanh
+    float particleTime = state->drawAnim.timer * 8.0f;
+    for (int p = 0; p < 6; p++) {
+        float angle = particleTime + p * 1.047f; // 60 độ mỗi particle
+        float radius = 15.0f + 10.0f * sinf(particleTime + p);
+        float px = curX + curW/2 + cosf(angle) * radius;
+        float py = curY + curH/2 + sinf(angle) * radius;
+        float pAlpha = 0.6f * sinf(t * 3.14159f);
+        DrawCircle(px, py, 2.5f, (Color){255, 230, 100, (unsigned char)(pAlpha * 255)});
+    }
 }
 
 void DrawBattlefield(GameState *state) {
     DrawRightPanel(state);
     DrawLeftPanel(state);
+    DrawCardDrawAnimation(state);
 }
