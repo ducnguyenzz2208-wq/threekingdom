@@ -1,14 +1,15 @@
 #include "game_data.h"
+#include <stdio.h>
 
 Card cardDb[TOTAL_CARDS] = {
-    // Tướng 5 Sao
+    // --- TƯỚNG 5 SAO (Yêu cầu 1 Hiến Tế | Max Chỉ số: 2800) ---
     {1,
      "Lu Bo",
      "Lu Bu",
      5,
      TYPE_VO,
      KINGDOM_QUAN,
-     3500,
+     2800,
      2000,
      "anh_game/lubo.png",
      "Chien than vo dich thien ha, tay cam Phuong Thien Hoa Kich.",
@@ -20,8 +21,8 @@ Card cardDb[TOTAL_CARDS] = {
      5,
      TYPE_VO,
      KINGDOM_THUC,
-     2900,
-     1600,
+     2500,
+     1800,
      "anh_game/quanvu.png",
      "Vo thanh dung Thanh Long Yen Nguyet Dao, trung nghia ven toan.",
      "The Martial Saint wielding the Green Dragon Crescent Blade, perfectly "
@@ -33,8 +34,8 @@ Card cardDb[TOTAL_CARDS] = {
      5,
      TYPE_VO,
      KINGDOM_THUC,
-     3000,
-     1600,
+     2400,
+     2000,
      "anh_game/trieuvan.png",
      "That tien that xuat Truong Ban doc, cuu au chua A Dau.",
      "Charged in and out of Changban seven times to rescue the infant lord.",
@@ -45,22 +46,22 @@ Card cardDb[TOTAL_CARDS] = {
      5,
      TYPE_VAN,
      KINGDOM_THUC,
-     1700,
-     3100,
+     1200,
+     2800,
      "anh_game/giacatluong.png",
      "Ngoa Long tien sinh, muu luoc hon nguoi. Luc xuat Ky Son.",
      "Mr. Sleeping Dragon, possessing unmatched strategy. Launched six "
      "campaigns from Qishan.",
      {0}},
 
-    // Tướng 4 Sao
+    // --- TƯỚNG 4 SAO (Triệu hồi Thường | Max Chỉ số: 2000) ---
     {4,
      "Truong Phi",
      "Zhang Fei",
      4,
      TYPE_VO,
      KINGDOM_THUC,
-     2700,
+     2000,
      1500,
      "anh_game/truongphi.png",
      "Ho tuong gam vang cau Truong Ban, mot minh chan van quan.",
@@ -73,8 +74,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VAN,
      KINGDOM_QUAN,
-     1500,
-     2800,
+     800,
+     1900,
      "anh_game/dieuthuyen.png",
      "Tu dai my nhan, dung lien hoan ke ly gian Dong Trac va Lu Bo.",
      "One of the Four Beauties, used a chain stratagem to divide Dong Zhuo and "
@@ -86,8 +87,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VO,
      KINGDOM_THUC,
-     3000,
-     1600,
+     1900,
+     1400,
      "anh_game/masieu.png",
      "Cam Ma Sieu, uy chan Tay Luong, danh Tao Thao cat rau bo ao.",
      "Ma Chao the Splendid, terror of Xiliang, forced Cao Cao to cut his beard "
@@ -99,8 +100,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VO,
      KINGDOM_THUC,
-     2800,
-     1600,
+     1800,
+     1500,
      "anh_game/hoangtrung.png",
      "Lao tuong bach phat bach trung, chem Ha Hau Uyen tai Dinh Quan Son.",
      "Veteran archer who never missed, slayed Xiahou Yuan at Mount Dingjun.",
@@ -111,7 +112,7 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VO,
      KINGDOM_NGO,
-     2800,
+     1900,
      1600,
      "anh_game/tonsach.png",
      "Tieu Ba Vuong, binh dinh Giang Dong, dung manh vo song.",
@@ -123,8 +124,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VAN,
      KINGDOM_NGUY,
-     1700,
-     3100,
+     1300,
+     2000,
      "anh_game/tumay.png",
      "Lang Co chi tam, muu si nhan nai, dat nen mong cho nha Tan.",
      "Patient strategist with the ambition of a wolf, laid the foundation for "
@@ -136,8 +137,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VAN,
      KINGDOM_NGUY,
-     1700,
-     3100,
+     1500,
+     2000,
      "anh_game/taothao.png",
      "Gian hung thoi loan, muu luoc hon nguoi, thong nhat phuong Bac.",
      "Hero of chaos, brilliant strategist who unified Northern China.",
@@ -148,8 +149,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VAN,
      KINGDOM_NGO,
-     1600,
-     2900,
+     1400,
+     1900,
      "anh_game/chudu.png",
      "Dai do doc Dong Ngo, hoa thieu Xich Bich, tai kiem van vo.",
      "Grand Viceroy of Eastern Wu, orchestrated the fire attack at Chibi.",
@@ -160,8 +161,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VO,
      KINGDOM_NGUY,
-     3100,
-     1700,
+     2000,
+     1000,
      "anh_game/dienvi.png",
      "Ho ve trung thanh cua Tao Thao, mot minh chan van quan.",
      "Cao Cao's loyal bodyguard, held off an entire army single-handedly.",
@@ -172,8 +173,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VO,
      KINGDOM_NGUY,
-     2900,
-     1600,
+     1900,
+     1200,
      "anh_game/huachu.png",
      "Ho Si, luc si vo song, loa bo ao dau Ma Sieu.",
      "Tiger Fool, a warrior of immense strength, fought Ma Chao bare-chested.",
@@ -184,8 +185,8 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VO,
      KINGDOM_NGUY,
-     2900,
-     1600,
+     1800,
+     1800,
      "anh_game/truonglieu.png",
      "Uy chan Hop Phi, 800 quan pha 10 van.",
      "Terror of Hefei, defeated an army of 100,000 with only 800 men.",
@@ -196,22 +197,116 @@ Card cardDb[TOTAL_CARDS] = {
      4,
      TYPE_VO,
      KINGDOM_NGO,
-     3000,
+     1800,
      1600,
      "anh_game/thaisutu.png",
      "Manh tuong Giang Dong, dau tay doi voi Ton Sach.",
      "Fierce general of Jiangdong, fought Sun Ce to a standstill.",
      {0}},
+    {60,
+     "Dang Ngai",
+     "Deng Ai",
+     4,
+     TYPE_VO,
+     KINGDOM_NGUY,
+     1800,
+     1800,
+     "anh_game/dangngai.png",
+     "Danh tuong nuoc Nguy, treo deo loi suoi qua duong Am Binh, diet gon Thuc "
+     "Han.",
+     "A brilliant Wei general who crossed the rugged terrain of Yinping to "
+     "conquer Shu Han.",
+     {0}},
+    {61,
+     "Chung Hoi",
+     "Zhong Hui",
+     4,
+     TYPE_VAN,
+     KINGDOM_NGUY,
+     1600,
+     1900,
+     "anh_game/chunghoi.png",
+     "Tuong soai tai ba nhung da tam lon, cung Dang Ngai diet Thuc roi muu "
+     "phan.",
+     "A talented Wei commander who conquered Shu alongside Deng Ai and later "
+     "rebelled.",
+     {0}},
+    {62,
+     "Tu Ma Su",
+     "Sima Shi",
+     4,
+     TYPE_VAN,
+     KINGDOM_NGUY,
+     1700,
+     1900,
+     "anh_game/tumasu.png",
+     "Truong tu cua Tu Ma Y, phe Nguy de Tao Phuong, nam tron binh quyen.",
+     "The eldest son of Sima Yi who deposed Emperor Cao Fang and seized "
+     "control of Wei.",
+     {0}},
+    {63,
+     "Tu Ma Chieu",
+     "Sima Zhao",
+     4,
+     TYPE_VAN,
+     KINGDOM_NGUY,
+     1600,
+     2000,
+     "anh_game/tumachieu.png",
+     "Da tam ro nhu ban ngay, sai nguoi giet Nguy de.",
+     "Sima Yi's son whose ambitions were well known, orchestrated the "
+     "assassination of the Wei Emperor.",
+     {0}},
+    {64,
+     "Tu Ma Viem",
+     "Sima Yan",
+     4,
+     TYPE_VAN,
+     KINGDOM_TAN,
+     1500,
+     1800,
+     "anh_game/tumaviem.png",
+     "Chau noi Tu Ma Y, ep Nguy de nhuong ngoi, lap ra nha Tan, thong nhat Tam "
+     "Quoc.",
+     "Grandson of Sima Yi who forced the Wei emperor to abdicate, establishing "
+     "the Jin Dynasty.",
+     {0}},
+    {65,
+     "Duong Ho",
+     "Yang Hu",
+     4,
+     TYPE_VO,
+     KINGDOM_TAN,
+     1400,
+     2000,
+     "anh_game/duongho.png",
+     "Dai do doc nha Tan, phong ngu Tuong Duong vung nhu ban thach.",
+     "A famous Jin Viceroy who defended Xiangyang with absolute stability and "
+     "high righteousness.",
+     {0}},
+    {66,
+     "Luc Khang",
+     "Lu Kang",
+     4,
+     TYPE_VO,
+     KINGDOM_NGO,
+     1500,
+     1900,
+     "anh_game/luckhang.png",
+     "Con trai Luc Ton, tru cot cuoi cung cua Dong Ngo, doi dau Duong Ho.",
+     "Son of Lu Xun and the last pillar of Eastern Wu, who famously confronted "
+     "Yang Hu.",
+     {0}},
 
-    // Tướng 3 Sao
+    // --- TƯỚNG 3 SAO (Triệu hồi Thường | Max Chỉ số: 1700) ---
     {7,
      "Luu Bi",
      "Liu Bei",
      3,
      TYPE_VAN,
      KINGDOM_THUC,
-     1400,
-     2600,
+     1200,
+     1500,
      "anh_game/luubi.png",
      "Huyen Duc nhan nghia, sang lap nha Thuc Han.",
      "Virtuous Xuande, founder of the Shu Han kingdom.",
@@ -222,8 +317,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_NGO,
+     1300,
      1500,
-     2900,
      "anh_game/tonquyen.png",
      "Bich Nhan Nhi, chua Dong Ngo.",
      "The green-eyed ruler of Eastern Wu.",
@@ -234,8 +329,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_NGUY,
-     2800,
-     1600,
+     1700,
+     1200,
      "anh_game/hahaudon.png",
      "Doc nhan tuong quan, nuot con nguoi giua tran.",
      "One-eyed general who swallowed his own eye during battle.",
@@ -246,8 +341,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_QUAN,
-     1500,
-     2900,
+     1400,
+     1400,
      "anh_game/vienthieu.png",
      "Dai chu hau phuong Bac, bai tran Quan Do.",
      "Great warlord of the North, defeated at Guandu.",
@@ -258,8 +353,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_THUC,
-     1600,
-     2900,
+     1000,
+     1700,
      "anh_game/bangthong.png",
      "Phuong So tien sinh, tai tri sanh ngang Gia Cat Luong.",
      "Mr. Fledgling Phoenix, a strategist rivaling Zhuge Liang.",
@@ -270,8 +365,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_NGO,
-     2600,
-     1400,
+     1700,
+     1000,
      "anh_game/camninh.png",
      "Kinh Chau Cam Hung Ba, dung manh tuyet luan.",
      "Fierce pirate-turned-general with bells of terror.",
@@ -282,8 +377,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_QUAN,
+     1600,
      1500,
-     2500,
      "anh_game/dongtrac.png",
      "Bao chua long quyen, khong che thien tu.",
      "Tyrant who hijacked the Han dynasty and controlled the emperor.",
@@ -294,8 +389,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_THUC,
-     2700,
-     1500,
+     1600,
+     1200,
      "anh_game/nguydien.png",
      "Manh tuong phan chu, bi chem theo ke Khong Minh.",
      "Fierce general accused of treason, executed via Zhuge Liang's plot.",
@@ -306,8 +401,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_NGUY,
-     1500,
-     2700,
+     1000,
+     1600,
      "anh_game/quachgia.png",
      "Muu si tai ba yeu menh cua Tao Thao.",
      "Brilliant but short-lived strategist of Cao Cao.",
@@ -318,8 +413,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_NGUY,
-     1500,
-     2700,
+     1100,
+     1600,
      "anh_game/giahu.png",
      "Doc si Gia Hu, muu ke hiem doc.",
      "The venomous strategist, master of ruthless schemes.",
@@ -330,8 +425,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_THUC,
-     2800,
-     1700,
+     1600,
+     1500,
      "anh_game/khuongduy.png",
      "Truyen nhan cua Gia Cat Luong, 9 lan Bac phat.",
      "Zhuge Liang's successor, launched nine northern expeditions.",
@@ -342,7 +437,7 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_NGO,
-     2700,
+     1500,
      1500,
      "anh_game/lamong.png",
      "Bach y qua song danh Kinh Chau, ha Quan Vu.",
@@ -354,8 +449,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_NGO,
-     1600,
-     2900,
+     1200,
+     1700,
      "anh_game/lucton.png",
      "Dai do doc Dong Ngo, hoa thieu doanh trai Di Lang.",
      "Viceroy of Wu, burned Liu Bei's camps at Yiling.",
@@ -366,8 +461,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_QUAN,
-     2700,
-     1400,
+     1700,
+     1100,
      "anh_game/nhanluong.png",
      "Manh tuong Vien Thieu, bi Quan Vu chem tai Bach Ma.",
      "Yuan Shao's fierce general, slain by Guan Yu at Baima.",
@@ -378,8 +473,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_NGO,
-     2800,
-     1500,
+     1700,
+     1400,
      "anh_game/tonkien.png",
      "Ho tuong Giang Dong, cha cua Ton Sach va Ton Quyen.",
      "Tiger of Jiangdong, father of Sun Ce and Sun Quan.",
@@ -390,8 +485,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_NGUY,
-     2700,
      1600,
+     1400,
      "anh_game/truongcap.png",
      "Ngu Tu Luong Tuong, gioi xoay chuyen tinh the.",
      "One of the Five Elite Generals, master of adaptable tactics.",
@@ -402,8 +497,8 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VAN,
      KINGDOM_NGUY,
-     1500,
-     2700,
+     900,
+     1700,
      "anh_game/tuanuc.png",
      "Vuong Ta chi tai, muu si hang dau Tao Thao.",
      "Cao Cao's top advisor and grand statesman.",
@@ -414,22 +509,35 @@ Card cardDb[TOTAL_CARDS] = {
      3,
      TYPE_VO,
      KINGDOM_QUAN,
-     2600,
-     1400,
+     1600,
+     1100,
      "anh_game/vanxu.png",
      "Manh tuong Vien Thieu, dung cam xung phong.",
      "Brave general of Yuan Shao, charged into battle fearlessly.",
      {0}},
+    {59,
+     "Ma Toc",
+     "Ma Su",
+     3,
+     TYPE_VAN,
+     KINGDOM_THUC,
+     1300,
+     1500,
+     "anh_game/matsoc.png",
+     "Doc nhieu binh thu nhung thieu thuc tien, lam mat Nhai Dinh.",
+     "A Shu strategist who possessed great theoretical knowledge but failed at "
+     "Jieting.",
+     {0}},
 
-    // Tướng 2 Sao
+    // --- TƯỚNG 2 SAO (Triệu hồi Thường | Max Chỉ số: 1300) ---
     {15,
      "Hoa Hung",
      "Hua Xiong",
      2,
      TYPE_VO,
      KINGDOM_QUAN,
-     2600,
-     1400,
+     1300,
+     800,
      "anh_game/hoahung.png",
      "Manh tuong Dong Trac, bi Quan Vu chem khi ruou con nong.",
      "General of Dong Zhuo, slain by Guan Yu while his wine was still warm.",
@@ -440,8 +548,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_NGO,
-     2600,
-     1500,
+     1200,
+     1000,
      "anh_game/chuthai.png",
      "Manh tuong Dong Ngo, cuu Ton Quyen thoat hiem.",
      "Wu general who took countless scars to save Sun Quan.",
@@ -452,8 +560,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_NGO,
-     2500,
-     1500,
+     1100,
+     1200,
      "anh_game/hoangcai.png",
      "Lao tuong Dong Ngo, dung kho nhuc ke tai Xich Bich.",
      "Veteran who endured a physical beating to execute a fake defection.",
@@ -464,8 +572,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_QUAN,
-     2600,
-     1400,
+     1300,
+     900,
      "anh_game/kylinh.png",
      "Dai tuong Vien Thuat, cam Tam Tiem Luong Nhat Dao.",
      "General of Yuan Shu, wielded the Three-Point Double-Edged Blade.",
@@ -476,8 +584,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_THUC,
-     2400,
-     1300,
+     1100,
+     1100,
      "anh_game/lieuhoa.png",
      "Lao tuong Thuc Han, trung thanh son sat.",
      "Loyal veteran general of Shu Han.",
@@ -488,8 +596,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VAN,
      KINGDOM_NGO,
-     1400,
-     2600,
+     800,
+     1300,
      "anh_game/lotuc.png",
      "Muu si Dong Ngo, chu truong lien minh Ton-Luu.",
      "Diplomatic advisor who advocated for the Sun-Liu alliance.",
@@ -500,8 +608,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_THUC,
-     2500,
-     1400,
+     1200,
+     900,
      "anh_game/madai.png",
      "Em ho Ma Sieu, chem Nguy Dien theo ke Gia Cat Luong.",
      "Cousin of Ma Chao, executed Wei Yan on Zhuge Liang's secret orders.",
@@ -512,8 +620,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_NGUY,
-     2700,
-     1500,
+     1300,
+     1000,
      "anh_game/nhactien.png",
      "Ngu Tu Luong Tuong, tran thu Hop Phi.",
      "One of the Five Elite Generals, stationed at Hefei.",
@@ -524,8 +632,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VAN,
      KINGDOM_THUC,
-     1400,
-     2700,
+     700,
+     1300,
      "anh_game/phapchinh.png",
      "Muu si Luu Bi, bay ke chiem Ich Chau.",
      "Liu Bei's brilliant tactician who helped conquer Yizhou.",
@@ -536,8 +644,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_THUC,
-     2500,
-     1400,
+     1200,
+     1000,
      "anh_game/quanbinh.png",
      "Con trai Quan Vu, cung cha tu tran Mach Thanh.",
      "Adopted son of Guan Yu, fought to the death alongside his father.",
@@ -548,8 +656,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_NGUY,
-     2500,
-     1700,
+     1000,
+     1300,
      "anh_game/taonhan.png",
      "Em ho Tao Thao, tran thu Phan Thanh.",
      "Cao Cao's cousin and a formidable defensive commander.",
@@ -560,8 +668,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VAN,
      KINGDOM_NGUY,
-     1400,
-     2600,
+     800,
+     1200,
      "anh_game/trinhduc.png",
      "Muu si Tao Thao, tinh toan sau xa.",
      "Highly capable and pragmatic advisor to Cao Cao.",
@@ -572,8 +680,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_NGO,
-     2600,
-     1400,
+     1100,
+     1100,
      "anh_game/trinhpho.png",
      "Lao tuong Dong Ngo, phuc vu ba doi ho Ton.",
      "Veteran general who served three generations of the Sun family.",
@@ -584,8 +692,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_THUC,
-     2500,
-     1400,
+     1200,
+     900,
      "anh_game/truongbao.png",
      "Con Truong Phi, theo Gia Cat Luong Bac phat.",
      "Son of Zhang Fei, marched on the Northern Expeditions.",
@@ -596,8 +704,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VAN,
      KINGDOM_QUAN,
-     1400,
-     2700,
+     900,
+     1300,
      "anh_game/truonggiac.png",
      "Giao chu Thai Binh Dao, tu xung Thien Cong Tuong Quan.",
      "Leader of the Yellow Turbans, proclaimed himself General of Heaven.",
@@ -608,8 +716,8 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_NGUY,
-     2700,
-     1500,
+     1300,
+     1100,
      "anh_game/tuhoang.png",
      "Ngu Tu Luong Tuong, giai vay Phan Thanh.",
      "Elite Wei general who lifted the siege of Fancheng.",
@@ -620,22 +728,22 @@ Card cardDb[TOTAL_CARDS] = {
      2,
      TYPE_VO,
      KINGDOM_NGUY,
-     2600,
-     1400,
+     1200,
+     1000,
      "anh_game/vucam.png",
      "Ngu Tu Luong Tuong, dau hang nhuc nha.",
      "Once an elite general, his reputation was ruined by surrendering.",
      {0}},
 
-    // Tướng 1 Sao
+    // --- TƯỚNG 1 SAO (Triệu hồi Thường | Max Chỉ số: 900) ---
     {26,
      "Chau Thuong",
      "Zhou Cang",
      1,
      TYPE_VO,
      KINGDOM_THUC,
-     2300,
-     1300,
+     900,
+     600,
      "anh_game/chauthuong.png",
      "Ho ve trung thanh cua Quan Vu.",
      "Loyal shield-bearer of Guan Yu.",
@@ -646,8 +754,8 @@ Card cardDb[TOTAL_CARDS] = {
      1,
      TYPE_VO,
      KINGDOM_QUAN,
-     2400,
-     1500,
+     800,
+     800,
      "anh_game/chutuan.png",
      "Danh tuong nha Han, dep loan Khan Vang.",
      "Han imperial general who fought the Yellow Turbans.",
@@ -658,8 +766,8 @@ Card cardDb[TOTAL_CARDS] = {
      1,
      TYPE_VO,
      KINGDOM_QUAN,
-     2400,
-     1500,
+     800,
+     800,
      "anh_game/hoangphutung.png",
      "Danh tuong nha Han, dep tac Khan Vang.",
      "Famous Han commander who quelled the Yellow Turban Rebellion.",
@@ -670,8 +778,8 @@ Card cardDb[TOTAL_CARDS] = {
      1,
      TYPE_VAN,
      KINGDOM_QUAN,
-     1300,
-     2500,
+     500,
+     900,
      "anh_game/luthuc.png",
      "Thay cua Luu Bi, hai noi dai nho.",
      "Liu Bei's mentor and a great scholar of the Han empire.",
@@ -682,8 +790,8 @@ Card cardDb[TOTAL_CARDS] = {
      1,
      TYPE_VAN,
      KINGDOM_THUC,
-     1200,
-     2300,
+     400,
+     800,
      "anh_game/mychuc.png",
      "Phu thuong giau co, tai tro Luu Bi dung nghiep.",
      "Wealthy merchant who heavily funded Liu Bei's early campaigns.",
@@ -694,8 +802,8 @@ Card cardDb[TOTAL_CARDS] = {
      1,
      TYPE_VAN,
      KINGDOM_THUC,
-     1200,
-     2200,
+     400,
+     700,
      "anh_game/toncan.png",
      "Tung si trung thanh cua Luu Bi, ngoai giao gioi.",
      "Loyal follower of Liu Bei, skilled in diplomacy.",
@@ -706,20 +814,53 @@ Card cardDb[TOTAL_CARDS] = {
      1,
      TYPE_VO,
      KINGDOM_QUAN,
-     2400,
-     1500,
+     900,
+     500,
      "anh_game/truongluong.png",
      "Nhan Cong Tuong Quan, em Truong Giac, khoi loan Khan Vang.",
      "General of the People, brother of Zhang Jiao.",
      {0}}};
 
-Texture2D bgTexture = {0};
+Texture2D arenaTextures[7] = {0};
+bool arenaUnlocked[7] = {true, false, false, false, false, false, false};
+int currentArenaIndex = 0;
+int playerCoins = 500;
+
 Texture2D menuTexture = {0};
 Texture2D cardBackTexture = {0};
 
+void SavePlayerData(void) {
+  FILE *f = fopen("save.dat", "wb");
+  if (f) {
+    fwrite(&playerCoins, sizeof(int), 1, f);
+    fwrite(&currentArenaIndex, sizeof(int), 1, f);
+    fwrite(arenaUnlocked, sizeof(bool), 7, f);
+    fclose(f);
+  }
+}
+
+void LoadPlayerData(void) {
+  FILE *f = fopen("save.dat", "rb");
+  if (f) {
+    fread(&playerCoins, sizeof(int), 1, f);
+    fread(&currentArenaIndex, sizeof(int), 1, f);
+    fread(arenaUnlocked, sizeof(bool), 7, f);
+    fclose(f);
+  }
+}
+
 void LoadAllCardTextures() {
-  bgTexture = LoadTexture("anh_game/sandau.png");
-  SetTextureFilter(bgTexture, TEXTURE_FILTER_BILINEAR);
+  arenaTextures[0] = LoadTexture("anh_game/sandau.png");
+  arenaTextures[1] = LoadTexture("anh_game/sandau2.png");
+  arenaTextures[2] = LoadTexture("anh_game/sandau3.png");
+  arenaTextures[3] = LoadTexture("anh_game/sandau4.png");
+  arenaTextures[4] = LoadTexture("anh_game/sandau5.png");
+  arenaTextures[5] = LoadTexture("anh_game/sandau6.png");
+  arenaTextures[6] = LoadTexture("anh_game/sandau7.png");
+
+  for (int i = 0; i < 7; i++) {
+    SetTextureFilter(arenaTextures[i], TEXTURE_FILTER_BILINEAR);
+  }
 
   menuTexture = LoadTexture("anh_game/menu.png");
   SetTextureFilter(menuTexture, TEXTURE_FILTER_BILINEAR);
@@ -732,7 +873,9 @@ void LoadAllCardTextures() {
 }
 
 void UnloadAllCardTextures() {
-  UnloadTexture(bgTexture);
+  for (int i = 0; i < 7; i++) {
+    UnloadTexture(arenaTextures[i]);
+  }
   UnloadTexture(menuTexture);
   UnloadTexture(cardBackTexture);
 
@@ -747,15 +890,15 @@ Music bgmWin = {0};
 Music bgmLose = {0};
 
 void LoadAllMusic() {
-    bgmMenu = LoadMusicStream("nhacgame/nhacmenu.mp3");
-    bgmBattle = LoadMusicStream("nhacgame/nhactrongtran.mp3");
-    bgmWin = LoadMusicStream("nhacgame/nhacthangtran.mp3");
-    bgmLose = LoadMusicStream("nhacgame/nhacthuatran.mp3");
+  bgmMenu = LoadMusicStream("nhacgame/nhacmenu.mp3");
+  bgmBattle = LoadMusicStream("nhacgame/nhactrongtran.mp3");
+  bgmWin = LoadMusicStream("nhacgame/nhacthangtran.mp3");
+  bgmLose = LoadMusicStream("nhacgame/nhacthuatran.mp3");
 }
 
 void UnloadAllMusic() {
-    UnloadMusicStream(bgmMenu);
-    UnloadMusicStream(bgmBattle);
-    UnloadMusicStream(bgmWin);
-    UnloadMusicStream(bgmLose);
+  UnloadMusicStream(bgmMenu);
+  UnloadMusicStream(bgmBattle);
+  UnloadMusicStream(bgmWin);
+  UnloadMusicStream(bgmLose);
 }

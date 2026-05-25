@@ -10,7 +10,7 @@ extern bool isEnglishMode;
 #define DECK_SIZE 40
 
 typedef enum { TYPE_VO, TYPE_VAN } CardType;
-typedef enum { KINGDOM_THUC, KINGDOM_NGUY, KINGDOM_NGO, KINGDOM_QUAN } Kingdom;
+typedef enum { KINGDOM_THUC, KINGDOM_NGUY, KINGDOM_NGO, KINGDOM_QUAN, KINGDOM_TAN } Kingdom;
 
 typedef struct {
   int id;
@@ -86,13 +86,14 @@ typedef struct {
   bool isPlayerTurn;
 
   int totalTurnCount;
-  bool hasNormalSummonedThisTurn;
+  int normalSummonsThisTurn;
 
   GamePhase currentPhase;
   Slot *selectedAttacker;
 
   Rectangle btnNextRect;
   Rectangle btnExitRect;
+  Rectangle btnDiscardRect;
 
   const Card *hoveredCard;
   bool hoveredCardIsEnemy;
@@ -112,7 +113,9 @@ typedef enum {
   SCREEN_AI,
   SCREEN_PVP,
   SCREEN_STORY,
-  SCREEN_SETTINGS
+  SCREEN_SETTINGS,
+  SCREEN_SHOP,
+  SCREEN_ARENA_SELECT
 } GameScreen;
 
 #endif // GAME_STRUCTS_H

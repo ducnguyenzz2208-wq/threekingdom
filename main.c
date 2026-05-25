@@ -35,7 +35,7 @@ void InitGameplay() {
   // Bắt đầu từ Giai đoạn chuẩn bị (Preparation Phase)
   gameState.currentPhase = PHASE_PREPARATION;
   gameState.totalTurnCount = 1;
-  gameState.hasNormalSummonedThisTurn = false;
+  gameState.normalSummonsThisTurn = 0;
 
   gameState.isRollingDice = false;
   gameState.playerDiceValue = 1;
@@ -127,6 +127,7 @@ int main(void) {
   InitAudioDevice();
   LoadAllCardTextures();
   LoadAllMusic();
+  LoadPlayerData(); // ADD THIS
   PlayMusicStream(bgmMenu);
 
   while (!WindowShouldClose()) {
@@ -158,12 +159,11 @@ int main(void) {
     Vector2 mousePoint = GetMousePosition();
     int currentWidth = GetScreenWidth();
     int currentHeight = GetScreenHeight();
-    Rectangle btnPlay = {currentWidth / 2 - 150, currentHeight / 2 - 60, 300,
-                         60};
-    Rectangle btnLang = {currentWidth / 2 - 150, currentHeight / 2 + 30, 300,
-                         60};
-    Rectangle btnSettings = {currentWidth / 2 - 150, currentHeight / 2 + 120,
-                             300, 60};
+    Rectangle btnPlay = {currentWidth / 2 - 150, currentHeight / 2 - 150, 300, 60};
+    Rectangle btnShop = {currentWidth / 2 - 150, currentHeight / 2 - 60, 300, 60};
+    Rectangle btnArenaSelect = {currentWidth / 2 - 150, currentHeight / 2 + 30, 300, 60};
+    Rectangle btnLang = {currentWidth / 2 - 150, currentHeight / 2 + 120, 300, 60};
+    Rectangle btnSettings = {currentWidth / 2 - 150, currentHeight / 2 + 210, 300, 60};
 
     switch (currentScreen) {
     case SCREEN_MENU:
@@ -175,12 +175,77 @@ int main(void) {
           StopMusicStream(bgmMenu);
           PlayMusicStream(bgmBattle);
         }
+        if (CheckCollisionPointRec(mousePoint, btnShop)) {
+          currentScreen = SCREEN_SHOP;
+        }
+        if (CheckCollisionPointRec(mousePoint, btnArenaSelect)) {
+          currentScreen = SCREEN_ARENA_SELECT;
+        }
         if (CheckCollisionPointRec(mousePoint, btnSettings)) {
           currentScreen = SCREEN_SETTINGS;
         }
         if (CheckCollisionPointRec(mousePoint, btnLang)) {
           isEnglishMode = !isEnglishMode;
         }
+      }
+      break;
+
+    case SCREEN_SHOP:
+      UpdateMusicStream(bgmMenu);
+      if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Rectangle btnBack = {25, currentHeight - 60, 200, 40};
+        if (CheckCollisionPointRec(mousePoint, btnBack)) {
+          currentScreen = SCREEN_MENU;
+        }
+        
+        Rectangle btnGacha = {currentWidth / 2 - 100, currentHeight / 2, 200, 60};
+        if (CheckCollisionPointRec(mousePoint, btnGacha) && playerCoins >= 100) {
+            // Find locked arenas
+            int lockedIndices[7];
+            int lockedCount = 0;
+            for(int i=0; i<7; i++) {
+                if(!arenaUnlocked[i]) {
+                    lockedIndices[lockedCount++] = i;
+                }
+            }
+            if(lockedCount > 0) {
+                playerCoins -= 100;
+                int randIdx = rand() % lockedCount;
+                arenaUnlocked[lockedIndices[randIdx]] = true;
+                SavePlayerData();
+            }
+        }
+      }
+      if (IsKeyPressed(KEY_BACKSPACE)) {
+        currentScreen = SCREEN_MENU;
+      }
+      break;
+
+    case SCREEN_ARENA_SELECT:
+      UpdateMusicStream(bgmMenu);
+      if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Rectangle btnBack = {25, currentHeight - 60, 200, 40};
+        if (CheckCollisionPointRec(mousePoint, btnBack)) {
+          currentScreen = SCREEN_MENU;
+        }
+        
+        // Check click on arena buttons
+        int startX = currentWidth / 2 - (3 * 200 + 2 * 20) / 2;
+        int startY = 150;
+        for(int i=0; i<7; i++) {
+            if(arenaUnlocked[i]) {
+                int row = i / 3;
+                int col = i % 3;
+                Rectangle arenaBtn = {startX + col * 220, startY + row * 160, 200, 120};
+                if (CheckCollisionPointRec(mousePoint, arenaBtn)) {
+                    currentArenaIndex = i;
+                    SavePlayerData();
+                }
+            }
+        }
+      }
+      if (IsKeyPressed(KEY_BACKSPACE)) {
+        currentScreen = SCREEN_MENU;
       }
       break;
 
@@ -220,8 +285,11 @@ int main(void) {
         UpdateGameplay(&gameState);
         if (prevStatus == 0 && gameState.gameStatus != 0) {
           StopMusicStream(bgmBattle);
-          if (gameState.gameStatus == 1)
+          if (gameState.gameStatus == 1) {
             PlayMusicStream(bgmWin);
+            playerCoins += 100;
+            SavePlayerData();
+          }
           else if (gameState.gameStatus == 2)
             PlayMusicStream(bgmLose);
         }
@@ -249,7 +317,7 @@ int main(void) {
 
       DrawText("TAM QUOC CARD GAME",
                currentWidth / 2 - MeasureText("TAM QUOC CARD GAME", 50) / 2,
-               currentHeight / 2 - 180, 50, GOLD);
+               currentHeight / 2 - 250, 50, GOLD);
 
       DrawRectangleRec(btnPlay, CheckCollisionPointRec(mousePoint, btnPlay)
                                     ? DARKGRAY
@@ -261,6 +329,28 @@ int main(void) {
               MeasureText(isEnglishMode ? "PLAY AI MODE" : "CHOI VOI AI", 24) /
                   2,
           btnPlay.y + 18, 24, WHITE);
+          
+      DrawRectangleRec(btnShop, CheckCollisionPointRec(mousePoint, btnShop)
+                                    ? DARKGRAY
+                                    : GRAY);
+      DrawRectangleLinesEx(btnShop, 2, WHITE);
+      DrawText(
+          isEnglishMode ? "SHOP (GACHA)" : "SHOP QUAY SAN",
+          btnShop.x + btnShop.width / 2 -
+              MeasureText(isEnglishMode ? "SHOP (GACHA)" : "SHOP QUAY SAN", 24) /
+                  2,
+          btnShop.y + 18, 24, WHITE);
+          
+      DrawRectangleRec(btnArenaSelect, CheckCollisionPointRec(mousePoint, btnArenaSelect)
+                                    ? DARKGRAY
+                                    : GRAY);
+      DrawRectangleLinesEx(btnArenaSelect, 2, WHITE);
+      DrawText(
+          isEnglishMode ? "SELECT ARENA" : "CHON SAN DAU",
+          btnArenaSelect.x + btnArenaSelect.width / 2 -
+              MeasureText(isEnglishMode ? "SELECT ARENA" : "CHON SAN DAU", 24) /
+                  2,
+          btnArenaSelect.y + 18, 24, WHITE);
 
       DrawRectangleRec(btnLang, CheckCollisionPointRec(mousePoint, btnLang)
                                     ? DARKGRAY
@@ -282,6 +372,69 @@ int main(void) {
                btnSettings.x + btnSettings.width / 2 -
                    MeasureText(isEnglishMode ? "SETTINGS" : "CAI DAT", 24) / 2,
                btnSettings.y + 18, 24, WHITE);
+      break;
+
+    case SCREEN_SHOP:
+      ClearBackground(DARKBLUE);
+      DrawText(isEnglishMode ? "ARENA SHOP" : "SHOP SAN DAU", currentWidth / 2 - MeasureText(isEnglishMode ? "ARENA SHOP" : "SHOP SAN DAU", 40) / 2, 50, 40, GOLD);
+      
+      char coinStr[64];
+      sprintf(coinStr, isEnglishMode ? "Coins: %d" : "Xu: %d", playerCoins);
+      DrawText(coinStr, currentWidth / 2 - MeasureText(coinStr, 30) / 2, 120, 30, YELLOW);
+      
+      int lockedCount = 0;
+      for(int i=0; i<7; i++) {
+          if(!arenaUnlocked[i]) lockedCount++;
+      }
+      
+      Rectangle btnGacha = {currentWidth / 2 - 100, currentHeight / 2, 200, 60};
+      if(lockedCount > 0) {
+          DrawRectangleRec(btnGacha, CheckCollisionPointRec(mousePoint, btnGacha) ? DARKGRAY : GRAY);
+          DrawRectangleLinesEx(btnGacha, 2, WHITE);
+          DrawText(isEnglishMode ? "SPIN (100 Coins)" : "QUAY (100 Xu)", btnGacha.x + btnGacha.width/2 - MeasureText(isEnglishMode ? "SPIN (100 Coins)" : "QUAY (100 Xu)", 20)/2, btnGacha.y + 20, 20, WHITE);
+      } else {
+          DrawText(isEnglishMode ? "All Arenas Unlocked!" : "Da so huu tat ca san dau!", currentWidth / 2 - MeasureText(isEnglishMode ? "All Arenas Unlocked!" : "Da so huu tat ca san dau!", 30) / 2, currentHeight / 2, 30, GREEN);
+      }
+      
+      Rectangle btnBackShop = {25, currentHeight - 60, 200, 40};
+      DrawRectangleRec(btnBackShop, CheckCollisionPointRec(mousePoint, btnBackShop) ? MAROON : RED);
+      DrawText(isEnglishMode ? "BACK" : "QUAY LAI", btnBackShop.x + btnBackShop.width / 2 - MeasureText(isEnglishMode ? "BACK" : "QUAY LAI", 20) / 2, btnBackShop.y + 10, 20, WHITE);
+      break;
+
+    case SCREEN_ARENA_SELECT:
+      ClearBackground(DARKBLUE);
+      DrawText(isEnglishMode ? "SELECT ARENA" : "CHON SAN DAU", currentWidth / 2 - MeasureText(isEnglishMode ? "SELECT ARENA" : "CHON SAN DAU", 40) / 2, 50, 40, GOLD);
+      
+      int startX = currentWidth / 2 - (3 * 200 + 2 * 20) / 2;
+      int startY = 150;
+      for(int i=0; i<7; i++) {
+          if(arenaUnlocked[i]) {
+              int row = i / 3;
+              int col = i % 3;
+              Rectangle arenaBtn = {startX + col * 220, startY + row * 160, 200, 120};
+              
+              if(arenaTextures[i].id > 0) {
+                  DrawTexturePro(arenaTextures[i], (Rectangle){0,0,arenaTextures[i].width,arenaTextures[i].height}, arenaBtn, (Vector2){0,0}, 0.0f, WHITE);
+              } else {
+                  DrawRectangleRec(arenaBtn, GRAY);
+              }
+              
+              if(currentArenaIndex == i) {
+                  DrawRectangleLinesEx(arenaBtn, 4, RED);
+                  DrawText(isEnglishMode ? "SELECTED" : "DANG CHON", arenaBtn.x + 10, arenaBtn.y + 10, 20, RED);
+              } else {
+                  DrawRectangleLinesEx(arenaBtn, 2, WHITE);
+              }
+              
+              if(CheckCollisionPointRec(mousePoint, arenaBtn)) {
+                  DrawRectangleLinesEx(arenaBtn, 4, GOLD);
+              }
+          }
+      }
+      
+      Rectangle btnBackArena = {25, currentHeight - 60, 200, 40};
+      DrawRectangleRec(btnBackArena, CheckCollisionPointRec(mousePoint, btnBackArena) ? MAROON : RED);
+      DrawText(isEnglishMode ? "BACK" : "QUAY LAI", btnBackArena.x + btnBackArena.width / 2 - MeasureText(isEnglishMode ? "BACK" : "QUAY LAI", 20) / 2, btnBackArena.y + 10, 20, WHITE);
       break;
 
     case SCREEN_SETTINGS:

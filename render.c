@@ -101,6 +101,7 @@ void InitBattlefieldLayout(GameState *state, int screenWidth, int screenHeight) 
         };
     }
 
+    state->btnDiscardRect = (Rectangle){25, screenHeight - 160, leftPanelW - 50, 40};
     state->btnNextRect = (Rectangle){25, screenHeight - 110, leftPanelW - 50, 40};
     state->btnExitRect = (Rectangle){25, screenHeight - 60, leftPanelW - 50, 40};
 }
@@ -205,8 +206,30 @@ static void DrawLeftPanel(GameState *state) {
         DrawTextWrapped(isEnglishMode ? displayCard->desc_en : displayCard->desc_vn, imgX + 10, sepY + 8, 16, DARKGRAY, imgW - 20);
     }
 
-    DrawRectangleRec(state->btnNextRect, GOLD);
-    DrawText(isEnglishMode ? "Next Phase" : "Tiep Theo", state->btnNextRect.x + 10, state->btnNextRect.y + 10, 20, BLACK);
+    int playerFieldCount = 0;
+    for (int i = 0; i < 5; i++) {
+        if (!state->playerAtkRow[i].isEmpty) playerFieldCount++;
+        if (!state->playerDefRow[i].isEmpty) playerFieldCount++;
+    }
+    bool isEndTurnPhase = (state->currentPhase == PHASE_MAIN_2 || (state->currentPhase == PHASE_MAIN_1 && state->totalTurnCount == 1));
+    bool exceedsLimit = (state->playerHandCount > 3 || playerFieldCount > 5);
+
+    if (state->isPlayerTurn && isEndTurnPhase && exceedsLimit) {
+        bool hasSelection = (state->selectedCardIndexInHand >= 0 || state->selectedAttacker != NULL);
+        if (hasSelection) {
+            DrawRectangleRec(state->btnDiscardRect, RED);
+            DrawRectangleLinesEx(state->btnDiscardRect, 2, GOLD);
+            DrawText(isEnglishMode ? "DISCARD CHOSEN" : "HUY BAI CHON", state->btnDiscardRect.x + 10, state->btnDiscardRect.y + 10, 20, WHITE);
+        }
+    }
+
+    if (state->isPlayerTurn && isEndTurnPhase && exceedsLimit) {
+        DrawRectangleRec(state->btnNextRect, GRAY);
+        DrawText(isEnglishMode ? "Next Phase" : "Tiep Theo", state->btnNextRect.x + 10, state->btnNextRect.y + 10, 20, DARKGRAY);
+    } else {
+        DrawRectangleRec(state->btnNextRect, GOLD);
+        DrawText(isEnglishMode ? "Next Phase" : "Tiep Theo", state->btnNextRect.x + 10, state->btnNextRect.y + 10, 20, BLACK);
+    }
     DrawRectangleRec(state->btnExitRect, MAROON);
     DrawText(isEnglishMode ? "EXIT" : "THOAT", state->btnExitRect.x + 10, state->btnExitRect.y + 10, 20, WHITE);
 }
@@ -221,9 +244,9 @@ static void DrawRightPanel(GameState *state) {
     
     // === VẼ NỀN GAME (chỉ vùng sân đấu, không bao gồm hand area) ===
     int fieldBottomY = screenH - handAreaH - 10;
-    if (bgTexture.id > 0) {
-        DrawTexturePro(bgTexture, 
-            (Rectangle){0, 0, bgTexture.width, bgTexture.height}, 
+    if (arenaTextures[currentArenaIndex].id > 0) {
+        DrawTexturePro(arenaTextures[currentArenaIndex], 
+            (Rectangle){0, 0, arenaTextures[currentArenaIndex].width, arenaTextures[currentArenaIndex].height}, 
             (Rectangle){leftW, 0, rightW, fieldBottomY}, 
             (Vector2){0,0}, 0.0f, WHITE);
     }
@@ -255,6 +278,22 @@ static void DrawRightPanel(GameState *state) {
     }
     int phaseTextW = MeasureText(phaseStr, 22);
     DrawText(phaseStr, leftW + rightW/2 - phaseTextW/2, 12, 22, GOLD);
+
+    // Draw limit warning if exceeds hand/field limits at the end of player turn
+    int playerFieldCount = 0;
+    for (int i = 0; i < 5; i++) {
+        if (!state->playerAtkRow[i].isEmpty) playerFieldCount++;
+        if (!state->playerDefRow[i].isEmpty) playerFieldCount++;
+    }
+    bool isEndTurnPhase = (state->currentPhase == PHASE_MAIN_2 || (state->currentPhase == PHASE_MAIN_1 && state->totalTurnCount == 1));
+    bool exceedsLimit = (state->playerHandCount > 3 || playerFieldCount > 5);
+
+    if (state->isPlayerTurn && isEndTurnPhase && exceedsLimit) {
+        char limitStr[128];
+        sprintf(limitStr, isEnglishMode ? "LIMIT EXCEEDED: Discard excess cards! (Hand: %d/3, Field: %d/5)" : "VUOT GIOI HAN: Hay huy bai thua! (Tay: %d/3, San: %d/5)", state->playerHandCount, playerFieldCount);
+        int limitTextW = MeasureText(limitStr, 18);
+        DrawText(limitStr, leftW + rightW/2 - limitTextW/2, 38, 18, RED);
+    }
 
     // === VẼ BÀI TRÊN SÂN ĐẤU ===
     for(int i=0; i<5; i++) {

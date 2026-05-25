@@ -6,68 +6,85 @@
 
 // Hàm AI chuẩn bị bài (Tung hết bài trên tay ra sân)
 static void DoEnemyPreparation(GameState *state) {
-  for (int i = 0; i < state->enemyHandCount; i++) {
+  int summonCount = 0;
+  int i = 0;
+  while (i < state->enemyHandCount && summonCount < 2) {
     bool placed = false;
-    for (int j = 0; j < 5; j++) {
-      if (state->enemyDefRow[j].isEmpty) {
-        state->enemyDefRow[j].card = state->enemyHand[i];
-        state->enemyDefRow[j].isEmpty = false;
-        state->enemyDefRow[j].hasAttacked = false;
-        state->enemyDefRow[j].isDefending = false;
-        state->enemyDefRow[j].summonedThisTurn = true;
-        state->enemyDefRow[j].positionChangedThisTurn = false;
-        placed = true;
-        break;
+    const Card *card = state->enemyHand[i];
+    bool preferAttack = card->atk >= card->def;
+
+    if (preferAttack) {
+      for (int j = 0; j < 5; j++) {
+        if (state->enemyDefRow[j].isEmpty) {
+          state->enemyDefRow[j].card = card;
+          state->enemyDefRow[j].isEmpty = false;
+          state->enemyDefRow[j].hasAttacked = false;
+          state->enemyDefRow[j].isDefending = false;
+          state->enemyDefRow[j].summonedThisTurn = true;
+          state->enemyDefRow[j].positionChangedThisTurn = false;
+          placed = true;
+          break;
+        }
       }
-    }
-    if (!placed) {
+    } else {
       for (int j = 0; j < 5; j++) {
         if (state->enemyAtkRow[j].isEmpty) {
-          state->enemyAtkRow[j].card = state->enemyHand[i];
+          state->enemyAtkRow[j].card = card;
           state->enemyAtkRow[j].isEmpty = false;
           state->enemyAtkRow[j].hasAttacked = false;
           state->enemyAtkRow[j].isDefending = true;
           state->enemyAtkRow[j].summonedThisTurn = true;
           state->enemyAtkRow[j].positionChangedThisTurn = false;
+          placed = true;
           break;
         }
       }
     }
+
+    if (!placed) {
+      // Place in whatever row is available if preferred row is full
+      for (int j = 0; j < 5; j++) {
+        if (state->enemyDefRow[j].isEmpty) {
+          state->enemyDefRow[j].card = card;
+          state->enemyDefRow[j].isEmpty = false;
+          state->enemyDefRow[j].hasAttacked = false;
+          state->enemyDefRow[j].isDefending = false;
+          state->enemyDefRow[j].summonedThisTurn = true;
+          state->enemyDefRow[j].positionChangedThisTurn = false;
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        for (int j = 0; j < 5; j++) {
+          if (state->enemyAtkRow[j].isEmpty) {
+            state->enemyAtkRow[j].card = card;
+            state->enemyAtkRow[j].isEmpty = false;
+            state->enemyAtkRow[j].hasAttacked = false;
+            state->enemyAtkRow[j].isDefending = true;
+            state->enemyAtkRow[j].summonedThisTurn = true;
+            state->enemyAtkRow[j].positionChangedThisTurn = false;
+            placed = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (placed) {
+      // Remove from hand by shifting
+      for (int k = i; k < state->enemyHandCount - 1; k++) {
+        state->enemyHand[k] = state->enemyHand[k + 1];
+      }
+      state->enemyHandCount--;
+      summonCount++;
+    } else {
+      // If board is full, try next card
+      i++;
+    }
   }
-  state->enemyHandCount = 0;
 }
 
-// Hàm tự động đếm và ăn quái vật hiến tế TỪ MONSTER ZONE
-static bool CheckAndConsumeTributes(GameState *state, int requiredTributes) {
-  if (requiredTributes == 0)
-    return true;
-
-  int availableTributes = 0;
-  Slot *tributeTargets[2] = {NULL, NULL};
-
-  // Quét Monster Zone (Hàng giữa - playerDefRow)
-  for (int i = 0; i < 5 && availableTributes < requiredTributes; i++) {
-    if (!state->playerDefRow[i].isEmpty) {
-      tributeTargets[availableTributes++] = &state->playerDefRow[i];
-    }
-  }
-  
-  // Quét thêm hàng sau (playerAtkRow)
-  for (int i = 0; i < 5 && availableTributes < requiredTributes; i++) {
-    if (!state->playerAtkRow[i].isEmpty) {
-      tributeTargets[availableTributes++] = &state->playerAtkRow[i];
-    }
-  }
-
-  if (availableTributes >= requiredTributes) {
-    for (int i = 0; i < requiredTributes; i++) {
-      tributeTargets[i]->isEmpty = true;
-      tributeTargets[i]->card = NULL;
-    }
-    return true;
-  }
-  return false;
-}
 
 // Hàm đặt bài
 static void PlaceCardInSlot(GameState *state, Slot *slot, bool isSetMode) {
@@ -101,6 +118,10 @@ static void PerformCombat(GameState *state, Slot *attacker, Slot *defender,
     if (atk > def) {
       defender->isEmpty = true;
       defender->card = NULL;
+      if (isPlayerAttacking)
+        state->enemyLP -= (atk - def);
+      else
+        state->playerLP -= (atk - def);
     } else if (atk < def) {
       // Đâm vào quái thủ to hơn -> Tự mất máu
       if (isPlayerAttacking)
@@ -200,22 +221,74 @@ static void DoEnemyTurn(GameState *state) {
         state->enemyDeck[state->enemyDeckCount];
   }
 
-  // Quái thú địch rơi vào Enemy Monster Zone (enemyDefRow)
-  for (int i = 0; i < 5; i++) {
-    if (state->enemyDefRow[i].isEmpty && state->enemyHandCount > 0) {
-      state->enemyHandCount--;
-      state->enemyDefRow[i].card = state->enemyHand[state->enemyHandCount];
-      state->enemyDefRow[i].isEmpty = false;
-      state->enemyDefRow[i].hasAttacked = false;
-      state->enemyDefRow[i].isDefending = false;
-      state->enemyDefRow[i].summonedThisTurn = true;
-      state->enemyDefRow[i].positionChangedThisTurn = false;
-      break;
+  // Quái thú địch rơi vào trận địa dựa trên chỉ số ATK/DEF
+  if (state->enemyHandCount > 0) {
+    const Card *cardToSummon = state->enemyHand[state->enemyHandCount - 1];
+    bool preferAttack = cardToSummon->atk >= cardToSummon->def;
+    bool placed = false;
+    
+    if (preferAttack) {
+      for (int i = 0; i < 5; i++) {
+        if (state->enemyDefRow[i].isEmpty) {
+          state->enemyHandCount--;
+          state->enemyDefRow[i].card = cardToSummon;
+          state->enemyDefRow[i].isEmpty = false;
+          state->enemyDefRow[i].hasAttacked = false;
+          state->enemyDefRow[i].isDefending = false;
+          state->enemyDefRow[i].summonedThisTurn = true;
+          state->enemyDefRow[i].positionChangedThisTurn = false;
+          placed = true;
+          break;
+        }
+      }
+    } else {
+      for (int i = 0; i < 5; i++) {
+        if (state->enemyAtkRow[i].isEmpty) {
+          state->enemyHandCount--;
+          state->enemyAtkRow[i].card = cardToSummon;
+          state->enemyAtkRow[i].isEmpty = false;
+          state->enemyAtkRow[i].hasAttacked = false;
+          state->enemyAtkRow[i].isDefending = true;
+          state->enemyAtkRow[i].summonedThisTurn = true;
+          state->enemyAtkRow[i].positionChangedThisTurn = false;
+          placed = true;
+          break;
+        }
+      }
+    }
+
+    if (!placed) {
+      // Đặt vào vị trí trống bất kỳ nếu hàng ưu tiên đã đầy
+      for (int i = 0; i < 5; i++) {
+        if (state->enemyDefRow[i].isEmpty) {
+          state->enemyHandCount--;
+          state->enemyDefRow[i].card = cardToSummon;
+          state->enemyDefRow[i].isEmpty = false;
+          state->enemyDefRow[i].hasAttacked = false;
+          state->enemyDefRow[i].isDefending = false;
+          state->enemyDefRow[i].summonedThisTurn = true;
+          state->enemyDefRow[i].positionChangedThisTurn = false;
+          placed = true;
+          break;
+        }
+        if (state->enemyAtkRow[i].isEmpty) {
+          state->enemyHandCount--;
+          state->enemyAtkRow[i].card = cardToSummon;
+          state->enemyAtkRow[i].isEmpty = false;
+          state->enemyAtkRow[i].hasAttacked = false;
+          state->enemyAtkRow[i].isDefending = true;
+          state->enemyAtkRow[i].summonedThisTurn = true;
+          state->enemyAtkRow[i].positionChangedThisTurn = false;
+          placed = true;
+          break;
+        }
+      }
     }
   }
 
   // Địch tấn công
-  Slot *enemyAttackers[10];
+  if (state->totalTurnCount > 1) {
+    Slot *enemyAttackers[10];
   int attackerCount = 0;
   for (int i = 0; i < 5; i++) {
     if (!state->enemyDefRow[i].isEmpty && !state->enemyDefRow[i].isDefending) {
@@ -231,19 +304,50 @@ static void DoEnemyTurn(GameState *state) {
     if (attacker->isEmpty || attacker->hasAttacked) continue;
 
     Slot *target = NULL;
+    Slot *candidates[5];
+    int candidateCount = 0;
+    
     // Ưu tiên phá hàng Thủ (Frontline - playerAtkRow) trước
     for (int j = 0; j < 5; j++) {
       if (!state->playerAtkRow[j].isEmpty) {
-        target = &state->playerAtkRow[j];
-        break;
+        candidates[candidateCount++] = &state->playerAtkRow[j];
       }
     }
+    
     // Nếu hàng Thủ trống, đánh hàng Công (Backline - playerDefRow)
-    if (!target) {
+    if (candidateCount == 0) {
       for (int j = 0; j < 5; j++) {
         if (!state->playerDefRow[j].isEmpty) {
-          target = &state->playerDefRow[j];
-          break;
+          candidates[candidateCount++] = &state->playerDefRow[j];
+        }
+      }
+    }
+
+    if (candidateCount > 0) {
+      int bestScore = -999999;
+      target = candidates[0];
+      int atk = attacker->card->atk;
+      for (int i = 0; i < candidateCount; i++) {
+        int score = 0;
+        Slot *slot = candidates[i];
+        if (slot->isDefending) {
+          if (atk > slot->card->def) {
+            // Ưu tiên quân thủ có thể tiêu diệt, DEF càng thấp điểm càng cao (để gây nhiều sát thương chênh lệch)
+            score = 10000 - slot->card->def;
+          } else {
+            score = -1000 - (slot->card->def - atk);
+          }
+        } else {
+          int def_atk = slot->card->atk;
+          if (atk > def_atk) {
+            score = 5000 + (atk - def_atk);
+          } else {
+            score = -5000 - (def_atk - atk);
+          }
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          target = slot;
         }
       }
     }
@@ -255,9 +359,61 @@ static void DoEnemyTurn(GameState *state) {
       attacker->hasAttacked = true;
     }
   }
+  }
+
+  // AI limits: Discard excess cards to maintain max 3 in hand and max 5 on field
+  while (state->enemyHandCount > 3) {
+    int worstIndex = 0;
+    int minStats = state->enemyHand[0]->atk + state->enemyHand[0]->def;
+    for (int i = 1; i < state->enemyHandCount; i++) {
+      int stats = state->enemyHand[i]->atk + state->enemyHand[i]->def;
+      if (stats < minStats) {
+        minStats = stats;
+        worstIndex = i;
+      }
+    }
+    for (int i = worstIndex; i < state->enemyHandCount - 1; i++) {
+      state->enemyHand[i] = state->enemyHand[i + 1];
+    }
+    state->enemyHandCount--;
+  }
+
+  int enemyFieldCount = 0;
+  for (int i = 0; i < 5; i++) {
+    if (!state->enemyAtkRow[i].isEmpty) enemyFieldCount++;
+    if (!state->enemyDefRow[i].isEmpty) enemyFieldCount++;
+  }
+  while (enemyFieldCount > 5) {
+    Slot *worstSlot = NULL;
+    int minStats = 999999;
+    for (int i = 0; i < 5; i++) {
+      if (!state->enemyAtkRow[i].isEmpty) {
+        int stats = state->enemyAtkRow[i].card->atk + state->enemyAtkRow[i].card->def;
+        if (stats < minStats) {
+          minStats = stats;
+          worstSlot = &state->enemyAtkRow[i];
+        }
+      }
+      if (!state->enemyDefRow[i].isEmpty) {
+        int stats = state->enemyDefRow[i].card->atk + state->enemyDefRow[i].card->def;
+        if (stats < minStats) {
+          minStats = stats;
+          worstSlot = &state->enemyDefRow[i];
+        }
+      }
+    }
+    if (worstSlot) {
+      worstSlot->isEmpty = true;
+      worstSlot->card = NULL;
+      enemyFieldCount--;
+    } else {
+      break;
+    }
+  }
 
   state->currentPhase = PHASE_DRAW;
   state->isPlayerTurn = true;
+  state->totalTurnCount++;
 
   // Reset cờ chiến đấu cho Player khi sang Turn mới
   for (int i = 0; i < 5; i++) {
@@ -379,6 +535,32 @@ void UpdateGameplay(GameState *state) {
   }
 
   if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    // Calculate player counts and limit check
+    int playerFieldCount = 0;
+    for (int i = 0; i < 5; i++) {
+      if (!state->playerAtkRow[i].isEmpty) playerFieldCount++;
+      if (!state->playerDefRow[i].isEmpty) playerFieldCount++;
+    }
+    bool isEndTurnPhase = (state->currentPhase == PHASE_MAIN_2 || (state->currentPhase == PHASE_MAIN_1 && state->totalTurnCount == 1));
+    bool exceedsLimit = (state->playerHandCount > 3 || playerFieldCount > 5);
+
+    if (isEndTurnPhase && exceedsLimit) {
+      if (CheckCollisionPointRec(mousePos, state->btnDiscardRect)) {
+        if (state->selectedCardIndexInHand >= 0) {
+          for (int i = state->selectedCardIndexInHand; i < state->playerHandCount - 1; i++) {
+            state->playerHand[i] = state->playerHand[i + 1];
+          }
+          state->playerHandCount--;
+          state->selectedCardIndexInHand = -1;
+        } else if (state->selectedAttacker != NULL) {
+          state->selectedAttacker->isEmpty = true;
+          state->selectedAttacker->card = NULL;
+          state->selectedAttacker = NULL;
+        }
+        return;
+      }
+    }
+
     if (CheckCollisionPointRec(mousePos, state->btnNextRect)) {
       switch (state->currentPhase) {
       case PHASE_PREPARATION:
@@ -390,10 +572,13 @@ void UpdateGameplay(GameState *state) {
         
       case PHASE_MAIN_1:
         if (state->totalTurnCount == 1) {
+          if (exceedsLimit) {
+            break;
+          }
           state->currentPhase = PHASE_END;
           state->isPlayerTurn = false;
           state->totalTurnCount++;
-          state->hasNormalSummonedThisTurn = false;
+          state->normalSummonsThisTurn = 0;
           for (int i = 0; i < 5; i++) {
             state->enemyDefRow[i].summonedThisTurn = false;
             state->enemyDefRow[i].positionChangedThisTurn = false;
@@ -412,10 +597,13 @@ void UpdateGameplay(GameState *state) {
         break;
 
       case PHASE_MAIN_2:
+        if (exceedsLimit) {
+          break;
+        }
         state->currentPhase = PHASE_END;
         state->isPlayerTurn = false;
         state->totalTurnCount++;
-        state->hasNormalSummonedThisTurn = false;
+        state->normalSummonsThisTurn = 0;
         for (int i = 0; i < 5; i++) {
           state->enemyDefRow[i].summonedThisTurn = false;
           state->enemyDefRow[i].positionChangedThisTurn = false;
@@ -436,49 +624,103 @@ void UpdateGameplay(GameState *state) {
       for (int i = 0; i < state->playerHandCount; i++) {
         if (CheckCollisionPointRec(mousePos, state->playerHandRects[i])) {
           state->selectedCardIndexInHand = i;
+          state->selectedAttacker = NULL;
           clickedHand = true;
           break;
         }
       }
 
       if (!clickedHand && state->selectedCardIndexInHand >= 0) {
-        if (state->hasNormalSummonedThisTurn && state->currentPhase != PHASE_PREPARATION) {
+        int maxSummons = (state->currentPhase == PHASE_PREPARATION) ? 2 : 1;
+        if (state->normalSummonsThisTurn >= maxSummons) {
           state->selectedCardIndexInHand = -1;
-          return;
-        }
+        } else {
+          const Card *cardToSummon = state->playerHand[state->selectedCardIndexInHand];
+          int reqTributes = 0;
+          if (cardToSummon->stars >= 5) reqTributes = 1;
 
-        const Card *cardToSummon =
-            state->playerHand[state->selectedCardIndexInHand];
-        int reqTributes = 0;
-        if (cardToSummon->stars >= 7)
-          reqTributes = 2;
-        else if (cardToSummon->stars >= 5)
-          reqTributes = 1;
+          bool placed = false;
 
-        bool placed = false;
-
-        for (int i = 0; i < 5; i++) {
-          // Normal Summon vào Monster Zone (Hàng thứ 3 từ trên xuống)
-          if (CheckCollisionPointRec(mousePos, state->playerDefRow[i].rect)) {
-            if (CheckAndConsumeTributes(state, reqTributes)) {
-              PlaceCardInSlot(state, &state->playerDefRow[i],
-                              false); // Đặt thế Công
-              if (state->currentPhase != PHASE_PREPARATION) {
-                state->hasNormalSummonedThisTurn = true;
+          for (int i = 0; i < 5; i++) {
+            if (CheckCollisionPointRec(mousePos, state->playerDefRow[i].rect)) {
+              if (reqTributes > 0) {
+                if (!state->playerDefRow[i].isEmpty && state->playerDefRow[i].card->stars <= 4) {
+                  state->playerDefRow[i].isEmpty = true;
+                  PlaceCardInSlot(state, &state->playerDefRow[i], false);
+                  state->normalSummonsThisTurn++;
+                  placed = true;
+                }
+              } else {
+                if (state->playerDefRow[i].isEmpty) {
+                  PlaceCardInSlot(state, &state->playerDefRow[i], false);
+                  state->normalSummonsThisTurn++;
+                  placed = true;
+                }
               }
-              placed = true;
+              break;
             }
-            break;
+
+            if (CheckCollisionPointRec(mousePos, state->playerAtkRow[i].rect)) {
+              if (reqTributes > 0) {
+                if (!state->playerAtkRow[i].isEmpty && state->playerAtkRow[i].card->stars <= 4) {
+                  state->playerAtkRow[i].isEmpty = true;
+                  PlaceCardInSlot(state, &state->playerAtkRow[i], true);
+                  state->normalSummonsThisTurn++;
+                  placed = true;
+                }
+              } else {
+                if (state->playerAtkRow[i].isEmpty) {
+                  PlaceCardInSlot(state, &state->playerAtkRow[i], true);
+                  state->normalSummonsThisTurn++;
+                  placed = true;
+                }
+              }
+              break;
+            }
           }
-          // Đặt bài Phép/Bẫy (Hàng sát mép màn hình dưới cùng)
-          if (CheckCollisionPointRec(mousePos, state->playerAtkRow[i].rect)) {
-            PlaceCardInSlot(state, &state->playerAtkRow[i], true); // Úp thế Thủ
-            placed = true;
-            break;
-          }
+          // if (!placed) state->selectedCardIndexInHand = -1; // Removed to prevent accidental deselection
         }
-        if (!placed)
-          state->selectedCardIndexInHand = -1;
+      } else if (!clickedHand && state->selectedCardIndexInHand == -1) {
+        if (state->selectedAttacker == NULL) {
+          for (int i = 0; i < 5; i++) {
+            if (CheckCollisionPointRec(mousePos, state->playerDefRow[i].rect) && !state->playerDefRow[i].isEmpty && !state->playerDefRow[i].positionChangedThisTurn && !state->playerDefRow[i].hasAttacked) {
+              state->selectedAttacker = &state->playerDefRow[i];
+              break;
+            }
+            if (CheckCollisionPointRec(mousePos, state->playerAtkRow[i].rect) && !state->playerAtkRow[i].isEmpty && !state->playerAtkRow[i].positionChangedThisTurn && !state->playerAtkRow[i].hasAttacked) {
+              state->selectedAttacker = &state->playerAtkRow[i];
+              break;
+            }
+          }
+        } else {
+          for (int i = 0; i < 5; i++) {
+            if (CheckCollisionPointRec(mousePos, state->playerDefRow[i].rect) && state->playerDefRow[i].isEmpty) {
+              state->playerDefRow[i].card = state->selectedAttacker->card;
+              state->playerDefRow[i].isDefending = false;
+              state->playerDefRow[i].isEmpty = false;
+              state->playerDefRow[i].hasAttacked = true;
+              state->playerDefRow[i].positionChangedThisTurn = true;
+              state->playerDefRow[i].summonedThisTurn = state->selectedAttacker->summonedThisTurn;
+
+              state->selectedAttacker->isEmpty = true;
+              state->selectedAttacker->card = NULL;
+              break;
+            }
+            if (CheckCollisionPointRec(mousePos, state->playerAtkRow[i].rect) && state->playerAtkRow[i].isEmpty) {
+              state->playerAtkRow[i].card = state->selectedAttacker->card;
+              state->playerAtkRow[i].isDefending = true;
+              state->playerAtkRow[i].isEmpty = false;
+              state->playerAtkRow[i].hasAttacked = true;
+              state->playerAtkRow[i].positionChangedThisTurn = true;
+              state->playerAtkRow[i].summonedThisTurn = state->selectedAttacker->summonedThisTurn;
+
+              state->selectedAttacker->isEmpty = true;
+              state->selectedAttacker->card = NULL;
+              break;
+            }
+          }
+          state->selectedAttacker = NULL;
+        }
       }
     } else if (state->currentPhase == PHASE_BATTLE) {
       if (state->selectedAttacker == NULL) {
